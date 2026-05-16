@@ -72,25 +72,8 @@ public class ApkToolWrapper {
 
     public void sign(Path unsignedApk, Path outputApk, File keystore,
                      String storePass, String keyAlias, String keyPass)
-            throws IOException, InterruptedException {
-        String javaHome = System.getProperty("java.home");
-        String jarsigner = javaHome + "/bin/jarsigner";
-
-        ProcessBuilder pb = new ProcessBuilder(
-                jarsigner,
-                "-keystore", keystore.getAbsolutePath(),
-                "-storepass", storePass,
-                "-keypass", keyPass,
-                "-signedjar", outputApk.toString(),
-                unsignedApk.toString(),
-                keyAlias
-        );
-        pb.inheritIO();
-        Process process = pb.start();
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new IOException("jarsigner failed with exit code " + exitCode);
-        }
+            throws Exception {
+        JavaApkSigner.sign(unsignedApk, outputApk, keystore, storePass, keyAlias, keyPass);
     }
 
     private void clearDir(Path dir) throws IOException {

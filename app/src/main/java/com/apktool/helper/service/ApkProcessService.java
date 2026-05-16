@@ -140,6 +140,7 @@ public class ApkProcessService extends Service {
         log(result.toString());
 
         log("[3/4] Recompiling...");
+        System.gc();
         Path unsignedApk = Paths.get(workDir, "unsigned.apk");
         apkTool.compile(decompiledDir, unsignedApk);
 
@@ -188,6 +189,7 @@ public class ApkProcessService extends Service {
         }
 
         log("[4/5] Recompiling...");
+        System.gc();
         Path unsignedApk = Paths.get(workDir, "unsigned.apk");
         apkTool.compile(decompiledDir, unsignedApk);
 

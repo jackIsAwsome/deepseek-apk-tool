@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/btn_ai_remove_ad"
-        style="@style/Widget.Material3.Button.TonalButton" />
+        style="@style/Widget.Material3.Button" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
