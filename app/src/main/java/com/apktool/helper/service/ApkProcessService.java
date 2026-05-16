@@ -34,7 +34,6 @@ public class ApkProcessService extends Service {
 
     public static final String ACTION_DECOMPILE = "decompile";
     public static final String ACTION_COMPILE = "compile";
-    public static final String ACTION_REMOVE_AD = "remove_ad";
     public static final String ACTION_AI_REMOVE_AD = "ai_remove_ad";
     public static final String ACTION_SIGN = "sign";
 
@@ -89,9 +88,6 @@ public class ApkProcessService extends Service {
                     case ACTION_COMPILE:
                         doCompile(input, output);
                         break;
-                    case ACTION_REMOVE_AD:
-                        doRemoveAd(input, output, intent);
-                        break;
                     case ACTION_AI_REMOVE_AD:
                         doAiRemoveAd(input, output, intent);
                         break;
@@ -124,40 +120,6 @@ public class ApkProcessService extends Service {
         Files.createDirectories(out.getParent());
         apkTool.compile(src, out);
         log("Compile finished: " + outApk);
-    }
-
-    private void doRemoveAd(String apkPath, String outApk, Intent intent) throws Exception {
-        String workDir = new File(getExternalFilesDir(null), "apktool").getAbsolutePath();
-        Path decompiledDir = Paths.get(workDir, "decompiled");
-
-        log("[1/4] Decompiling...");
-        clearDir(decompiledDir);
-        apkTool.decompile(Paths.get(apkPath), decompiledDir);
-
-        log("[2/4] Removing ad SDKs...");
-        SmaliAdRemover remover = new SmaliAdRemover(decompiledDir);
-        SmaliAdRemover.RemovalResult result = remover.removeAds();
-        log(result.toString());
-
-        log("[3/4] Recompiling...");
-        System.gc();
-        Path unsignedApk = Paths.get(workDir, "unsigned.apk");
-        apkTool.compile(decompiledDir, unsignedApk);
-
-        log("[4/4] Signing...");
-        String keystore = intent.getStringExtra(EXTRA_KEYSTORE);
-        if (keystore == null || keystore.isEmpty()) {
-            keystore = getDebugKeystore().getAbsolutePath();
-        }
-        String storePass = nvl(intent.getStringExtra(EXTRA_STORE_PASS), "android");
-        String keyAlias = nvl(intent.getStringExtra(EXTRA_KEY_ALIAS), "androiddebugkey");
-        String keyPass = nvl(intent.getStringExtra(EXTRA_KEY_PASS), "android");
-
-        apkTool.sign(unsignedApk, Paths.get(outApk), new File(keystore),
-                storePass, keyAlias, keyPass);
-        Files.deleteIfExists(unsignedApk);
-
-        log("Done! Output: " + outApk);
     }
 
     private void doAiRemoveAd(String apkPath, String outApk, Intent intent) throws Exception {

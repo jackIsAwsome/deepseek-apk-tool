@@ -42,18 +42,10 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/btn_remove_ad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/btn_remove_ad"
-        style="@style/Widget.Material3.Button" />
-
-    <Button
         android:id="@+id/btn_ai_remove_ad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="@string/btn_ai_remove_ad"
         style="@style/Widget.Material3.Button" />
 
