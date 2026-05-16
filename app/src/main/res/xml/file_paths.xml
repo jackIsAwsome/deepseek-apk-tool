@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path name="output" path="apktool/output/" />
+    <external-files-path name="work" path="apktool/" />
+</paths>

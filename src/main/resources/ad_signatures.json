@@ -1,0 +1,176 @@
+{
+  "adSdks": [
+    {
+      "name": "Google AdMob",
+      "packagePrefix": "com.google.android.gms.ads",
+      "classKeywords": [
+        "AdView", "AdManager", "InterstitialAd", "RewardedAd",
+        "AdRequest", "MobileAds", "AdSize", "NativeExpressAdView",
+        "AppOpenAd", "RewardedInterstitialAd"
+      ],
+      "manifestComponents": [
+        "com.google.android.gms.ads.AdActivity",
+        "com.google.android.gms.ads.AdService"
+      ],
+      "permissions": ["com.google.android.gms.permission.AD_ID"]
+    },
+    {
+      "name": "Facebook Audience Network",
+      "packagePrefix": "com.facebook.ads",
+      "classKeywords": [
+        "AdView", "InterstitialAd", "RewardedVideoAd", "NativeAd",
+        "AudienceNetworkAds", "AdSettings"
+      ],
+      "manifestComponents": [
+        "com.facebook.ads.AudienceNetworkActivity",
+        "com.facebook.ads.AudienceNetworkFullScreenActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Unity Ads",
+      "packagePrefix": "com.unity3d.ads",
+      "classKeywords": [
+        "UnityAds", "UnityAdsShow", "IUnityAdsListener",
+        "IUnityAdsShowListener", "Advertisement"
+      ],
+      "manifestComponents": [
+        "com.unity3d.ads.adunit.AdUnitActivity",
+        "com.unity3d.ads.adunit.AdUnitTransparentActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "AppLovin",
+      "packagePrefix": "com.applovin",
+      "classKeywords": [
+        "AppLovinSdk", "AppLovinAdView", "AppLovinInterstitialAd",
+        "AppLovinIncentivizedAd", "AppLovinAd", "AppLovinRewardedAd"
+      ],
+      "manifestComponents": [
+        "com.applovin.adview.AppLovinInterstitialActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "ironSource",
+      "packagePrefix": "com.ironsource",
+      "classKeywords": [
+        "IronSource", "InterstitialAd", "RewardedVideoAd",
+        "BannerAd", "LevelPlay"
+      ],
+      "manifestComponents": [
+        "com.ironsource.sdk.controller.ControllerActivity",
+        "com.ironsource.sdk.controller.InterstitialActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Vungle",
+      "packagePrefix": "com.vungle",
+      "classKeywords": [
+        "Vungle", "VungleAd", "VungleInterstitial", "VungleBanner"
+      ],
+      "manifestComponents": [
+        "com.vungle.warren.ui.VungleActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Mintegral",
+      "packagePrefix": "com.mbridge.msdk",
+      "classKeywords": [
+        "MBridge", "MInterstitial", "MRewardVideo", "MBanner"
+      ],
+      "manifestComponents": [
+        "com.mintegral.msdk.activity.MTGActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "AdColony",
+      "packagePrefix": "com.adcolony",
+      "classKeywords": [
+        "AdColony", "AdColonyInterstitial", "AdColonyAdView",
+        "AdColonyRewardedAd", "AdColonyNativeAd"
+      ],
+      "manifestComponents": [
+        "com.adcolony.sdk.AdColonyActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Chartboost",
+      "packagePrefix": "com.chartboost",
+      "classKeywords": [
+        "Chartboost", "ChartboostBanner", "ChartboostInterstitial",
+        "ChartboostRewarded"
+      ],
+      "manifestComponents": [
+        "com.chartboost.sdk.ChartboostActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "InMobi",
+      "packagePrefix": "com.inmobi",
+      "classKeywords": [
+        "InMobi", "InMobiBanner", "InMobiInterstitial",
+        "InMobiNative", "InMobiAdRequest"
+      ],
+      "manifestComponents": [
+        "com.inmobi.ads.InMobiActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Pangle (TikTok)",
+      "packagePrefix": "com.bytedance.sdk.openadsdk",
+      "classKeywords": [
+        "TTAdManager", "TTAdNative", "TTRewardVideoAd",
+        "TTInterstitialAd", "TTBannerAd", "TTFullScreenVideoAd"
+      ],
+      "manifestComponents": [
+        "com.bytedance.sdk.openadsdk.activity.TTAdActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTRewardVideoActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTInterstitialActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "MyTarget",
+      "packagePrefix": "com.my.target",
+      "classKeywords": [
+        "MyTarget", "MyTargetView", "MyTargetInterstitialAd",
+        "MyTargetRewardedAd"
+      ],
+      "manifestComponents": [
+        "com.my.target.common.MyTargetActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "StartApp",
+      "packagePrefix": "com.startapp",
+      "classKeywords": [
+        "StartAppSDK", "StartAppAd", "StartAppBanner",
+        "StartAppInterstitial", "StartAppNativeAd"
+      ],
+      "manifestComponents": [
+        "com.startapp.sdk.adsbase.activities.AdActivity"
+      ],
+      "permissions": []
+    },
+    {
+      "name": "Fyber (Digital Turbine)",
+      "packagePrefix": "com.fyber",
+      "classKeywords": [
+        "Fyber", "InterstitialAd", "RewardedVideoAd", "BannerAd"
+      ],
+      "manifestComponents": [
+        "com.fyber.inneractive.sdk.activities.InneractiveAdActivity"
+      ],
+      "permissions": []
+    }
+  ]
+}

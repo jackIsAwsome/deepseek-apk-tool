@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">APK Tool</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_decompile">Decompile</string>
+    <string name="tab_remove_ad">Remove Ad</string>
+    <string name="tab_settings">Sign</string>
+
+    <string name="select_apk_file">Select APK File</string>
+    <string name="installed_apps">Installed Apps</string>
+    <string name="select_output_dir">Select Output Directory</string>
+    <string name="btn_decompile">Decompile</string>
+    <string name="btn_compile">Compile</string>
+    <string name="btn_remove_ad">Remove Ads &amp; Repack</string>
+    <string name="btn_sign">Sign APK</string>
+    <string name="btn_generate_keystore">Generate Keystore</string>
+
+    <string name="label_input_apk">Input APK:</string>
+    <string name="label_output">Output:</string>
+    <string name="label_keystore">Keystore File:</string>
+    <string name="label_keystore_pass">Keystore Password:</string>
+    <string name="label_key_alias">Key Alias:</string>
+    <string name="label_key_pass">Key Password:</string>
+
+    <string name="processing">Processing…</string>
+    <string name="done">Done!</string>
+    <string name="error">Error occurred</string>
+    <string name="no_apk_selected">No APK file selected</string>
+
+    <string name="channel_progress">APK Processing</string>
+    <string name="notification_processing">Processing APK…</string>
+</resources>
