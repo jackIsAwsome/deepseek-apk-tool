@@ -18,8 +18,6 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -42,38 +40,33 @@ public class JavaApkSigner {
         PrivateKey privateKey = (PrivateKey) ks.getKey(keyAlias, keyPass.toCharArray());
         X509Certificate cert = (X509Certificate) ks.getCertificate(keyAlias);
 
-        // Build MANIFEST.MF with SHA-256 digests of all APK entries
-        Manifest manifest = new Manifest();
-        manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
-        manifest.getMainAttributes().putValue("Created-By", "APK Tool (Android)");
-
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-        Map<String, String> entryDigests = new TreeMap<>();
+        Map<String, String> fileDigests = new TreeMap<>();
 
+        // First pass: compute SHA-256 of each file's uncompressed content
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(unsignedApk))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 String name = entry.getName();
                 if (name.startsWith("META-INF/") || name.endsWith("/")) continue;
-
                 byte[] data = readAll(zis);
-                byte[] digest = sha256.digest(data);
-                entryDigests.put(name, Base64.getEncoder().encodeToString(digest));
+                fileDigests.put(name, Base64.getEncoder().encodeToString(sha256.digest(data)));
             }
         }
 
-        for (Map.Entry<String, String> e : entryDigests.entrySet()) {
-            Attributes attr = new Attributes();
-            attr.putValue("SHA-256-Digest", e.getValue());
-            manifest.getEntries().put(e.getKey(), attr);
+        // Build MANIFEST.MF manually with CRLF (java.util.jar.Manifest uses LF on Android)
+        StringBuilder mf = new StringBuilder();
+        mf.append("Manifest-Version: 1.0\r\n");
+        mf.append("Created-By: APK Tool (Android)\r\n\r\n");
+
+        for (Map.Entry<String, String> e : fileDigests.entrySet()) {
+            mf.append("Name: ").append(e.getKey()).append("\r\n");
+            mf.append("SHA-256-Digest: ").append(e.getValue()).append("\r\n\r\n");
         }
+        byte[] mfContent = mf.toString().getBytes(StandardCharsets.UTF_8);
 
-        // Write MANIFEST.MF to bytes
-        ByteArrayOutputStream mfBytes = new ByteArrayOutputStream();
-        manifest.write(mfBytes);
-        byte[] mfContent = mfBytes.toByteArray();
-
-        // Build CERT.SF
+        // Build CERT.SF with CRLF
+        // Per JAR spec: CERT.SF entry digest = SHA-256 of the corresponding MANIFEST.MF entry lines
         StringBuilder sf = new StringBuilder();
         sf.append("Signature-Version: 1.0\r\n");
         sf.append("Created-By: 1.0 (APK Tool Android)\r\n");
@@ -81,11 +74,12 @@ public class JavaApkSigner {
         sf.append(Base64.getEncoder().encodeToString(sha256.digest(mfContent)));
         sf.append("\r\n\r\n");
 
-        for (Map.Entry<String, String> e : entryDigests.entrySet()) {
+        for (Map.Entry<String, String> e : fileDigests.entrySet()) {
+            String mfEntry = "Name: " + e.getKey() + "\r\nSHA-256-Digest: " + e.getValue() + "\r\n\r\n";
+            String sfDigest = Base64.getEncoder().encodeToString(sha256.digest(mfEntry.getBytes(StandardCharsets.UTF_8)));
             sf.append("Name: ").append(e.getKey()).append("\r\n");
-            sf.append("SHA-256-Digest: ").append(e.getValue()).append("\r\n\r\n");
+            sf.append("SHA-256-Digest: ").append(sfDigest).append("\r\n\r\n");
         }
-
         byte[] sfContent = sf.toString().getBytes(StandardCharsets.UTF_8);
 
         // Sign CERT.SF with private key
@@ -107,11 +101,6 @@ public class JavaApkSigner {
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().startsWith("META-INF/")) continue;
                 ZipEntry outEntry = new ZipEntry(entry.getName());
-                outEntry.setMethod(entry.getMethod());
-                if (entry.getMethod() == ZipEntry.STORED) {
-                    outEntry.setSize(entry.getSize());
-                    outEntry.setCrc(entry.getCrc());
-                }
                 zos.putNextEntry(outEntry);
                 byte[] data = readAll(zis);
                 zos.write(data);

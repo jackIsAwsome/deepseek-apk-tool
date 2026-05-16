@@ -66,6 +66,16 @@
         android:visibility="gone"
         style="@style/Widget.Material3.LinearProgressIndicator" />
 
+    <Button
+        android:id="@+id/btn_install"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Install Output APK"
+        android:visibility="gone"
+        android:enabled="false"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"

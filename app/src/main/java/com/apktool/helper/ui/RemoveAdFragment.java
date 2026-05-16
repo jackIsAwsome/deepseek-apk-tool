@@ -1,6 +1,7 @@
 package com.apktool.helper.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -25,9 +27,10 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
 
     private ApkTaskViewModel viewModel;
     private TextInputEditText etApkPath, etOutApk;
-    private Button btnRemoveAd, btnAiRemoveAd;
+    private Button btnRemoveAd, btnAiRemoveAd, btnInstall;
     private ProgressBar progressBar;
     private TextView tvLog;
+    private String lastOutputApk;
 
     @Nullable
     @Override
@@ -40,6 +43,7 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
         etOutApk = root.findViewById(R.id.et_out_apk);
         btnRemoveAd = root.findViewById(R.id.btn_remove_ad);
         btnAiRemoveAd = root.findViewById(R.id.btn_ai_remove_ad);
+        btnInstall = root.findViewById(R.id.btn_install);
         progressBar = root.findViewById(R.id.progress_bar);
         tvLog = root.findViewById(R.id.tv_log);
 
@@ -57,6 +61,7 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
 
         btnRemoveAd.setOnClickListener(v -> startRemoveAd());
         btnAiRemoveAd.setOnClickListener(v -> startAiRemoveAd());
+        btnInstall.setOnClickListener(v -> installOutputApk());
 
         return root;
     }
@@ -131,6 +136,39 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
         viewModel.setIsProcessing(false);
         viewModel.appendLog(success ? "Success: " + message : "Failed: " + message);
         ApkProcessService.clearCallback();
+        if (success) {
+            lastOutputApk = etOutApk.getText().toString();
+            btnInstall.setVisibility(View.VISIBLE);
+            btnInstall.setEnabled(true);
+        }
+    }
+
+    private void installOutputApk() {
+        String apkPath = lastOutputApk;
+        if (apkPath == null) {
+            apkPath = etOutApk.getText().toString();
+        }
+        File apkFile = new File(apkPath);
+        if (!apkFile.exists()) {
+            viewModel.appendLog("Error: APK not found: " + apkPath);
+            return;
+        }
+
+        try {
+            Uri apkUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", apkFile);
+
+            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+            intent.setData(apkUri);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
+            intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+
+            startActivity(intent);
+            viewModel.appendLog("Starting install...");
+        } catch (Exception e) {
+            viewModel.appendLog("Install failed: " + e.getMessage());
+        }
     }
 
     @Override
