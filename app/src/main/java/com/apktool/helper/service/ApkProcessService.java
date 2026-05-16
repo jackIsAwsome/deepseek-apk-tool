@@ -17,6 +17,8 @@ import androidx.core.app.NotificationCompat;
 
 import com.apktool.helper.MainActivity;
 import com.apktool.helper.R;
+import com.apktool.helper.core.AiAdAnalyzer;
+import com.apktool.helper.core.AiAdRemover;
 import com.apktool.helper.core.ApkToolWrapper;
 import com.apktool.helper.core.SmaliAdRemover;
 
@@ -33,6 +35,7 @@ public class ApkProcessService extends Service {
     public static final String ACTION_DECOMPILE = "decompile";
     public static final String ACTION_COMPILE = "compile";
     public static final String ACTION_REMOVE_AD = "remove_ad";
+    public static final String ACTION_AI_REMOVE_AD = "ai_remove_ad";
     public static final String ACTION_SIGN = "sign";
 
     public static final String EXTRA_INPUT = "input";
@@ -89,6 +92,9 @@ public class ApkProcessService extends Service {
                     case ACTION_REMOVE_AD:
                         doRemoveAd(input, output, intent);
                         break;
+                    case ACTION_AI_REMOVE_AD:
+                        doAiRemoveAd(input, output, intent);
+                        break;
                     case ACTION_SIGN:
                         doSign(input, output, intent);
                         break;
@@ -138,6 +144,54 @@ public class ApkProcessService extends Service {
         apkTool.compile(decompiledDir, unsignedApk);
 
         log("[4/4] Signing...");
+        String keystore = intent.getStringExtra(EXTRA_KEYSTORE);
+        if (keystore == null || keystore.isEmpty()) {
+            keystore = getDebugKeystore().getAbsolutePath();
+        }
+        String storePass = nvl(intent.getStringExtra(EXTRA_STORE_PASS), "android");
+        String keyAlias = nvl(intent.getStringExtra(EXTRA_KEY_ALIAS), "androiddebugkey");
+        String keyPass = nvl(intent.getStringExtra(EXTRA_KEY_PASS), "android");
+
+        apkTool.sign(unsignedApk, Paths.get(outApk), new File(keystore),
+                storePass, keyAlias, keyPass);
+        Files.deleteIfExists(unsignedApk);
+
+        log("Done! Output: " + outApk);
+    }
+
+    private void doAiRemoveAd(String apkPath, String outApk, Intent intent) throws Exception {
+        String workDir = new File(getExternalFilesDir(null), "apktool").getAbsolutePath();
+        Path decompiledDir = Paths.get(workDir, "decompiled");
+
+        log("[1/5] Decompiling...");
+        clearDir(decompiledDir);
+        apkTool.decompile(Paths.get(apkPath), decompiledDir);
+
+        log("[2/5] AI analyzing ad SDKs (may take 30-60s)...");
+        AiAdAnalyzer analyzer = new AiAdAnalyzer();
+        AiAdAnalyzer.AiResult aiResult = analyzer.analyze(decompiledDir, ApkProcessService.this);
+
+        if (aiResult.success && !aiResult.patches.isEmpty()) {
+            log("AI found " + aiResult.patches.size() + " items to patch");
+            log("AI Summary: " + aiResult.summary);
+
+            log("[3/5] Applying AI patches...");
+            AiAdRemover aiRemover = new AiAdRemover(decompiledDir, aiResult);
+            AiAdRemover.RemovalResult patchResult = aiRemover.applyPatches();
+            log(patchResult.toString());
+        } else {
+            log("AI analysis failed or found nothing: " + aiResult.error);
+            log("[3/5] Falling back to rule-based ad removal...");
+            SmaliAdRemover remover = new SmaliAdRemover(decompiledDir);
+            SmaliAdRemover.RemovalResult result = remover.removeAds();
+            log(result.toString());
+        }
+
+        log("[4/5] Recompiling...");
+        Path unsignedApk = Paths.get(workDir, "unsigned.apk");
+        apkTool.compile(decompiledDir, unsignedApk);
+
+        log("[5/5] Signing...");
         String keystore = intent.getStringExtra(EXTRA_KEYSTORE);
         if (keystore == null || keystore.isEmpty()) {
             keystore = getDebugKeystore().getAbsolutePath();

@@ -25,7 +25,7 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
 
     private ApkTaskViewModel viewModel;
     private TextInputEditText etApkPath, etOutApk;
-    private Button btnRemoveAd;
+    private Button btnRemoveAd, btnAiRemoveAd;
     private ProgressBar progressBar;
     private TextView tvLog;
 
@@ -39,6 +39,7 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
         etApkPath = root.findViewById(R.id.et_apk_path);
         etOutApk = root.findViewById(R.id.et_out_apk);
         btnRemoveAd = root.findViewById(R.id.btn_remove_ad);
+        btnAiRemoveAd = root.findViewById(R.id.btn_ai_remove_ad);
         progressBar = root.findViewById(R.id.progress_bar);
         tvLog = root.findViewById(R.id.tv_log);
 
@@ -50,10 +51,12 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
         viewModel.getLogText().observe(getViewLifecycleOwner(), log -> tvLog.setText(log));
         viewModel.getIsProcessing().observe(getViewLifecycleOwner(), processing -> {
             btnRemoveAd.setEnabled(!processing);
+            btnAiRemoveAd.setEnabled(!processing);
             progressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
         });
 
         btnRemoveAd.setOnClickListener(v -> startRemoveAd());
+        btnAiRemoveAd.setOnClickListener(v -> startAiRemoveAd());
 
         return root;
     }
@@ -74,6 +77,36 @@ public class RemoveAdFragment extends Fragment implements ApkProcessService.Proc
         ApkProcessService.setCallback(this);
         Intent intent = new Intent(requireContext(), ApkProcessService.class);
         intent.putExtra("action", ApkProcessService.ACTION_REMOVE_AD);
+        intent.putExtra(ApkProcessService.EXTRA_INPUT, apkPath);
+        intent.putExtra(ApkProcessService.EXTRA_OUTPUT, outApk);
+
+        String ks = viewModel.getKeystorePath().getValue();
+        if (ks != null && !ks.isEmpty()) {
+            intent.putExtra(ApkProcessService.EXTRA_KEYSTORE, ks);
+            intent.putExtra(ApkProcessService.EXTRA_STORE_PASS, viewModel.getKeystorePass().getValue());
+            intent.putExtra(ApkProcessService.EXTRA_KEY_ALIAS, viewModel.getKeyAlias().getValue());
+            intent.putExtra(ApkProcessService.EXTRA_KEY_PASS, viewModel.getKeyPass().getValue());
+        }
+
+        requireContext().startService(intent);
+    }
+
+    private void startAiRemoveAd() {
+        String apkPath = etApkPath.getText().toString();
+        String outApk = etOutApk.getText().toString();
+
+        if (apkPath.isEmpty()) {
+            viewModel.appendLog("Error: No APK file selected");
+            return;
+        }
+
+        viewModel.setOutputPath(outApk);
+        viewModel.clearLog();
+        viewModel.setIsProcessing(true);
+
+        ApkProcessService.setCallback(this);
+        Intent intent = new Intent(requireContext(), ApkProcessService.class);
+        intent.putExtra("action", ApkProcessService.ACTION_AI_REMOVE_AD);
         intent.putExtra(ApkProcessService.EXTRA_INPUT, apkPath);
         intent.putExtra(ApkProcessService.EXTRA_OUTPUT, outApk);
 

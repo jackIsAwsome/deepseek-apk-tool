@@ -44,7 +44,11 @@
       "Bash(\"C:/Program Files/Android/Android Studio/jbr/bin/javap\" -p -c \"/c/Users/kendi/.gradle/caches/modules-2/files-2.1/org.apktool/apktool-lib/2.11.1/5752d9b8e548dc90e343141f9a98edcdf8d81df/apktool-lib-2.11.1.jar\")",
       "Bash(unzip -o \"/c/Users/kendi/.gradle/caches/modules-2/files-2.1/org.apktool/apktool-lib/2.11.1/5752d9b8e548dc90e343141f9a98edcdf8d81df/apktool-lib-2.11.1.jar\" \"brut/androlib/Config.class\")",
       "Bash(\"C:/Program Files/Android/Android Studio/jbr/bin/javap\" -p brut/androlib/Config.class)",
-      "mcp__plugin_claude-mem_mcp-search__search"
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(export JAVA_HOME=\"C:\\\\\\\\Program Files\\\\\\\\Android\\\\\\\\Android Studio\\\\\\\\jbr\")",
+      "Bash(adb install *)",
+      "Bash(C:/Users/kendi/AppData/Local/Android/Sdk/platform-tools/adb install *)"
     ]
   }
 }

@@ -1,12 +1,15 @@
 package com.apktool.helper.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -24,9 +27,12 @@ import java.io.File;
 
 public class SettingsFragment extends Fragment implements ApkProcessService.ProcessCallback {
 
+    private static final String PREFS_NAME = "apktool_prefs";
+    private static final String KEY_DEEPSEEK_API = "deepseek_api_key";
+
     private ApkTaskViewModel viewModel;
-    private TextInputEditText etKeystorePath, etKeystorePass, etKeyAlias, etKeyPass;
-    private Button btnGenerate, btnSign;
+    private TextInputEditText etDeepseekKey, etKeystorePath, etKeystorePass, etKeyAlias, etKeyPass;
+    private Button btnSaveApiKey, btnGenerate, btnSign;
     private TextView tvSignLog;
     private ActivityResultLauncher<String[]> openKeystore;
 
@@ -37,13 +43,28 @@ public class SettingsFragment extends Fragment implements ApkProcessService.Proc
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
         viewModel = new ViewModelProvider(requireActivity()).get(ApkTaskViewModel.class);
 
+        etDeepseekKey = root.findViewById(R.id.et_deepseek_key);
         etKeystorePath = root.findViewById(R.id.et_keystore_path);
         etKeystorePass = root.findViewById(R.id.et_keystore_pass);
         etKeyAlias = root.findViewById(R.id.et_key_alias);
         etKeyPass = root.findViewById(R.id.et_key_pass);
+        btnSaveApiKey = root.findViewById(R.id.btn_save_apikey);
         btnGenerate = root.findViewById(R.id.btn_generate_keystore);
         btnSign = root.findViewById(R.id.btn_sign);
         tvSignLog = root.findViewById(R.id.tv_sign_log);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String savedKey = prefs.getString(KEY_DEEPSEEK_API, "");
+        if (!savedKey.isEmpty()) {
+            etDeepseekKey.setText(savedKey);
+        }
+
+        btnSaveApiKey.setOnClickListener(v -> {
+            String key = etDeepseekKey.getText().toString().trim();
+            prefs.edit().putString(KEY_DEEPSEEK_API, key).apply();
+            Toast.makeText(requireContext(), "DeepSeek API Key saved", Toast.LENGTH_SHORT).show();
+            tvSignLog.setText("DeepSeek API Key saved.\nAI-powered ad removal is now available.");
+        });
 
         etKeystorePath.setText(viewModel.getKeystorePath().getValue());
         etKeystorePass.setText(viewModel.getKeystorePass().getValue());

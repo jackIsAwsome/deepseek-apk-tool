@@ -12,6 +12,7 @@
     <string name="btn_decompile">Decompile</string>
     <string name="btn_compile">Compile</string>
     <string name="btn_remove_ad">Remove Ads &amp; Repack</string>
+    <string name="btn_ai_remove_ad">AI Remove Ads &amp; Repack</string>
     <string name="btn_sign">Sign APK</string>
     <string name="btn_generate_keystore">Generate Keystore</string>
 
