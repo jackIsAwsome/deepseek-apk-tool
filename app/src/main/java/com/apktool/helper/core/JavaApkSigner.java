@@ -19,11 +19,10 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class JavaApkSigner {
 
@@ -101,34 +100,44 @@ public class JavaApkSigner {
         // Write signed APK
         Files.createDirectories(outputApk.getParent());
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(unsignedApk));
-             JarOutputStream jos = new JarOutputStream(new FileOutputStream(outputApk.toFile()))) {
+             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outputApk.toFile()))) {
 
-            // Copy all non-META-INF entries
+            // Copy all non-META-INF entries from unsigned APK
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().startsWith("META-INF/")) continue;
-                JarEntry je = new JarEntry(entry.getName());
-                jos.putNextEntry(je);
+                ZipEntry outEntry = new ZipEntry(entry.getName());
+                outEntry.setMethod(entry.getMethod());
+                if (entry.getMethod() == ZipEntry.STORED) {
+                    outEntry.setSize(entry.getSize());
+                    outEntry.setCrc(entry.getCrc());
+                }
+                zos.putNextEntry(outEntry);
                 byte[] data = readAll(zis);
-                jos.write(data);
-                jos.closeEntry();
+                zos.write(data);
+                zos.closeEntry();
                 zis.closeEntry();
             }
 
-            // Add META-INF entries
-            writeEntry(jos, "META-INF/MANIFEST.MF", mfContent);
-            writeEntry(jos, "META-INF/CERT.SF", sfContent);
-            writeEntry(jos, "META-INF/CERT.RSA", certRsa);
+            // Add META-INF signature entries (STORED method for correctness)
+            writeZipEntry(zos, "META-INF/MANIFEST.MF", mfContent);
+            writeZipEntry(zos, "META-INF/CERT.SF", sfContent);
+            writeZipEntry(zos, "META-INF/CERT.RSA", certRsa);
 
-            jos.finish();
+            zos.finish();
         }
     }
 
-    private static void writeEntry(JarOutputStream jos, String name, byte[] data) throws IOException {
-        JarEntry entry = new JarEntry(name);
-        jos.putNextEntry(entry);
-        jos.write(data);
-        jos.closeEntry();
+    private static void writeZipEntry(ZipOutputStream zos, String name, byte[] data) throws IOException {
+        ZipEntry entry = new ZipEntry(name);
+        entry.setMethod(ZipEntry.STORED);
+        entry.setSize(data.length);
+        java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+        crc.update(data);
+        entry.setCrc(crc.getValue());
+        zos.putNextEntry(entry);
+        zos.write(data);
+        zos.closeEntry();
     }
 
     private static KeyStore loadKeystore(File keystore, String storePass) throws Exception {
